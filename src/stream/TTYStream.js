@@ -54,14 +54,13 @@ const parseStream = async (stream, storageHandler, doneHandler) => stream
         payload,
       };
       storageHandler.addFrame(frame);
-      console.log('adding');
     },
     close() {
       doneHandler();
     },
     abort() {
       console.log('error');
-    }
+    },
   }));
 
 // https://eslint.org/docs/rules/no-await-in-loop#when-not-to-use-it
@@ -72,7 +71,6 @@ const createSequence = (storageHandler) => (offset) => (limit = Infinity) => asy
   while (currentIndex < limit) {
     // eslint-disable-next-line no-await-in-loop
     currentFrame = await storageHandler.getFrame(currentIndex);
-    console.log('createsequence currentFrame', currentFrame);
     if (currentFrame === null) {
       break; // be graceful for now
     }

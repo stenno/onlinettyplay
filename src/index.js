@@ -10,6 +10,7 @@ const $fileInput = document.querySelector('[type=file]');
 const $loadButton = document.querySelector('.load');
 const $runButton = document.querySelector('.run');
 const $stopButton = document.querySelector('.stop');
+const $loadStatus = document.querySelector('.status');
 
 let abortAutoplay = null;
 
@@ -17,7 +18,6 @@ const term = new Terminal();
 term.open(document.querySelector('#terminal'));
 
 const drawHandler = (data) => {
-  console.log('draw handler request with', data);
   term.write(data);
 };
 
@@ -27,18 +27,20 @@ const readFromInput = () => {
 };
 
 $loadButton.addEventListener('click', async () => {
-  console.log('load button');
+  $loadStatus.textContent = 'Started loading, please wait...';
   const stream = readFromInput();
-  parseStream(stream, storage, () => 'done loading');
+  parseStream(stream, storage, () => { $loadStatus.textContent = 'Done loading'; });
 });
 
 $stopButton.addEventListener('click', () => {
+  $loadStatus.textContent = 'Stopped playback';
   abortAutoplay?.abort();
 });
 
 $runButton.addEventListener('click', async () => {
+  $loadStatus.textContent = 'Started playback';
   abortAutoplay = new AbortController();
-  const sequenceGen = createSequence(storage)(0)(1000);
+  const sequenceGen = createSequence(storage)(0)();
   const result = await runSequence(abortAutoplay, sequenceGen, drawHandler);
-  console.log('done...', result);
+  $loadStatus.textContent = 'Finished playback';
 });
