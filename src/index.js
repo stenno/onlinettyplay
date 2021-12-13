@@ -38,6 +38,8 @@ $stopButton.addEventListener('click', () => {
 });
 
 $runButton.addEventListener('click', async () => {
+  // abort existing sequence
+  abortAutoplay?.abort();
   $loadStatus.textContent = 'Started playback';
   abortAutoplay = new AbortController();
   const sequenceGen = createSequence(storage)(0)();
