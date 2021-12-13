@@ -29,7 +29,7 @@ const readFromInput = () => {
 $loadButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started loading, please wait...';
   const stream = readFromInput();
-  parseStream(stream, storage, () => { $loadStatus.textContent = 'Done loading'; });
+  parseStream(stream, storage, (bytes) => { $loadStatus.textContent = `Done loading ${bytes} bytes.`; });
 });
 
 $stopButton.addEventListener('click', () => {
@@ -41,6 +41,6 @@ $runButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started playback';
   abortAutoplay = new AbortController();
   const sequenceGen = createSequence(storage)(0)();
-  const result = await runSequence(abortAutoplay, sequenceGen, drawHandler);
+  await runSequence(abortAutoplay, sequenceGen, drawHandler);
   $loadStatus.textContent = 'Finished playback';
 });
