@@ -13,12 +13,13 @@ const $stopButton = document.querySelector('.stop');
 const $loadStatus = document.querySelector('.status');
 
 let abortAutoplay = null;
+let currentFrame = 0;
 
 const term = new Terminal();
 term.open(document.querySelector('#terminal'));
 
-const drawHandler = (data) => {
-  term.write(data);
+const drawHandler = ({ payload }) => {
+  term.write(payload);
 };
 
 const readFromInput = () => {
@@ -35,14 +36,20 @@ $loadButton.addEventListener('click', async () => {
 $stopButton.addEventListener('click', () => {
   $loadStatus.textContent = 'Stopped playback';
   abortAutoplay?.abort();
+  currentFrame = 0;
 });
 
 $runButton.addEventListener('click', async () => {
   // abort existing sequence
-  abortAutoplay?.abort();
+  if (abortAutoplay?.signal?.aborted === false) {
+    // pause mode
+    $loadStatus.textContent = 'Paused playback';
+    abortAutoplay?.abort();
+    return;
+  }
   $loadStatus.textContent = 'Started playback';
   abortAutoplay = new AbortController();
-  const sequenceGen = createSequence(storage)(0)();
-  await runSequence(abortAutoplay, sequenceGen, drawHandler);
+  const sequenceGen = createSequence(storage)(currentFrame)();
+  currentFrame = await runSequence(abortAutoplay, sequenceGen, drawHandler);
   $loadStatus.textContent = 'Finished playback';
 });
