@@ -1,5 +1,6 @@
 class DefaultStorage {
   frames = [];
+  frameCount = 0;
 
   constructor() {
     this.reset();
@@ -7,6 +8,7 @@ class DefaultStorage {
 
   async addFrame(frame) {
     this.frames = [...this.frames, frame];
+    this.frameCount = this.frames.length;
     return frame;
   }
 
@@ -16,6 +18,7 @@ class DefaultStorage {
 
   reset() {
     this.frames = [];
+    this.frameCount = 0;
     return true;
   }
 }
