@@ -8,60 +8,34 @@ const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) 
   });
 });
 
-const splitStream = new TransformStream({ // eslint-disable-line no-undef
-  start() {},
-  transform(chunk, controller) {
-    chunk.forEach((char) => controller.enqueue(char));
-  },
-});
+// eslint-disable-next-line no-undef
+const decompress = (stream) => stream.pipeThrough(new DecompressionStream('gzip'));
+const parseHeader = (buffer) => {
+  const [timestamp, usec, byteLength] = new Uint32Array(buffer);
+  return ({ timestamp, usec, byteLength });
+};
 
-const rawParserStream = new TransformStream({ // eslint-disable-line no-undef
-  start() {
-    this.header = null;
-    this.headerBuffer = [];
-    this.payload = [];
-  },
-  transform(chunk, controller) {
-    if (this.headerBuffer.length < TTYREC_HEADER_SIZE) {
-      this.headerBuffer = Uint8Array.from([...this.headerBuffer, chunk]);
-      if (this.headerBuffer.length === TTYREC_HEADER_SIZE) {
-        const [timestamp, usec, byteLength] = new Uint32Array(this.headerBuffer.buffer);
-        this.header = { timestamp, usec, byteLength };
-      }
-    } else if (this.payload.length < this.header.byteLength) {
-      this.payload = Uint8Array.from([...this.payload, chunk]);
-      if (this.payload.length === this.header.byteLength) {
-        const { header, payload } = this;
-        const decoder = new TextDecoder();
-        controller.enqueue(JSON.stringify({ header, payload: decoder.decode(payload) }));
-        this.headerBuffer = [];
-        this.payload = [];
-      }
-    }
-  },
-});
-
-const parseStream = async (stream, storageHandler, doneHandler) => stream
-  .pipeThrough(new DecompressionStream('gzip')) // eslint-disable-line no-undef
-  .pipeThrough(splitStream)
-  .pipeThrough(rawParserStream)
-  .pipeTo(new WritableStream({
-    write(chunk) {
-      const { header: { timestamp, usec }, payload } = JSON.parse(chunk);
-      const toMillisec = timestamp * 1e3 + Math.floor(usec / 1e3);
-      const frame = {
-        timestamp: toMillisec,
-        payload,
-      };
-      storageHandler.addFrame(frame);
-    },
-    close() {
-      doneHandler();
-    },
-    abort() {
-      console.log('error');
-    },
-  }));
+const parseStream = async (stream, storageHandler, doneHandler) => {
+  const decompressed = decompress(stream);
+  const buffer = await new Response(decompressed).arrayBuffer();
+  const { byteLength: bufferLength } = buffer;
+  let offset = 0;
+  const decoder = new TextDecoder();
+  while (offset < bufferLength) {
+    const payloadOffset = offset + TTYREC_HEADER_SIZE;
+    const { timestamp, usec, byteLength } = parseHeader(buffer.slice(offset, payloadOffset));
+    const payloadBuffer = buffer.slice(payloadOffset, payloadOffset + byteLength);
+    const payload = decoder.decode(new Uint8Array(payloadBuffer));
+    const toMillisec = timestamp * 1e3 + Math.floor(usec / 1e3);
+    const frame = {
+      timestamp: toMillisec,
+      payload,
+    };
+    storageHandler.addFrame(frame);
+    offset += TTYREC_HEADER_SIZE + byteLength;
+  }
+  return doneHandler(bufferLength);
+};
 
 // https://eslint.org/docs/rules/no-await-in-loop#when-not-to-use-it
 const createSequence = (storageHandler) => (offset) => (limit = Infinity) => async function* () {
