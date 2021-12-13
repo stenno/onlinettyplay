@@ -11,6 +11,7 @@ const $loadButton = document.querySelector('.load');
 const $runButton = document.querySelector('.run');
 const $stopButton = document.querySelector('.stop');
 const $loadStatus = document.querySelector('.status');
+const $frameCounter = document.querySelector('.frames');
 
 let abortAutoplay = null;
 let currentFrame = 0;
@@ -18,7 +19,11 @@ let currentFrame = 0;
 const term = new Terminal();
 term.open(document.querySelector('#terminal'));
 
-const drawHandler = ({ payload }) => {
+const currentFrameString = (current, max) => `Frame: ${current}/${max}`;
+
+const frameHandler = ({ index, payload }) => {
+  const { frameCount } = storage;
+  $frameCounter.textContent = currentFrameString(index, frameCount);
   term.write(payload);
 };
 
@@ -30,7 +35,10 @@ const readFromInput = () => {
 $loadButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started loading, please wait...';
   const stream = readFromInput();
-  parseStream(stream, storage, (bytes) => { $loadStatus.textContent = `Done loading ${bytes} bytes.`; });
+  parseStream(stream, storage, (bytes) => {
+    $loadStatus.textContent = `Done loading ${bytes} bytes.`;
+    $frameCounter.textContent = currentFrameString(0, storage.frameCount);
+  });
 });
 
 $stopButton.addEventListener('click', () => {
@@ -50,6 +58,8 @@ $runButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started playback';
   abortAutoplay = new AbortController();
   const sequenceGen = createSequence(storage)(currentFrame)();
-  currentFrame = await runSequence(abortAutoplay, sequenceGen, drawHandler);
-  $loadStatus.textContent = 'Finished playback';
+  currentFrame = await runSequence(abortAutoplay, sequenceGen, frameHandler);
+  if (currentFrame === storage.frameCount - 1) {
+    $loadStatus.textContent = 'Finished playback';
+  }
 });

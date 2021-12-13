@@ -58,13 +58,13 @@ const createSequence = (storageHandler) => (offset) => (limit = Infinity) => asy
   }
 };
 
-const runSequence = async (controller, sequence, drawHandler) => {
+const runSequence = async (controller, sequence, frameHandler) => {
   const { signal } = controller;
   // eslint-disable-next-line no-restricted-syntax
   for await (const frame of sequence()) {
     const { index, duration } = frame;
     try {
-      drawHandler(frame);
+      frameHandler(frame);
       await delay(index)(duration)(signal);
     } catch (e) { // this handles abortcontroller exceptions
       return index;

@@ -3,8 +3,6 @@ import DefaultStorage from './DefaultStorage';
 const defaultPrefix = 'ttyrec';
 
 class BrowserStorage extends DefaultStorage {
-  frameCount = 0;
-
   constructor(prefix = defaultPrefix) {
     super();
     this.storagePrefix = prefix;
