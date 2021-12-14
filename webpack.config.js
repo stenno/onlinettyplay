@@ -21,11 +21,18 @@ const config = {
         extensions: ['*', '.js', '.jsx'],
     },
     devtool: 'source-map',
+    devServer: {
+        static: {
+            directory: path.join(__dirname, 'dist'),
+        },
+        compress: false,
+        port: 9000,
+    },
     module: {
         rules: [
             {
                 test: /\.(js|jsx)$/i,
-                exclude: /node_modules/,
+                exclude: [/node_modules/],
                 loader: 'babel-loader',
             },
             {
