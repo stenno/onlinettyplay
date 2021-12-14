@@ -16,8 +16,22 @@ const parseHeader = (buffer) => {
 };
 
 const parseStream = async (stream, storageHandler, doneHandler) => {
+  console.log('decompression started');
   const decompressed = decompress(stream);
+  console.log('decompression ended');
   const buffer = await new Response(decompressed).arrayBuffer();
+  console.log('got buffer');
+  const worker = new Worker(new URL('../workers/parseTTY.js', import.meta.url));
+  worker.onmessage = ({ data: frames }) => {
+    console.log('add');
+    if (frames === 'done') {
+      console.log('done parsing');
+      worker.terminate();
+    }
+    storageHandler.addFrames(frames);
+  };
+  worker.postMessage(buffer, [buffer]);
+  /*
   const { byteLength: bufferLength } = buffer;
   let offset = 0;
   const decoder = new TextDecoder();
@@ -33,8 +47,10 @@ const parseStream = async (stream, storageHandler, doneHandler) => {
     };
     storageHandler.addFrame(frame);
     offset += TTYREC_HEADER_SIZE + byteLength;
+    console.log('offset', offset, 'of', bufferLength);
   }
   return doneHandler(bufferLength);
+  */
 };
 
 // https://eslint.org/docs/rules/no-await-in-loop#when-not-to-use-it

@@ -22,6 +22,11 @@ class BrowserStorage extends DefaultStorage {
     return frame;
   }
 
+  async addFrames(frames) {
+    frames.forEach((frame) => this.addFrame(frame));
+    return frames;
+  }
+
   getFrame(index) {
     const key = this.getStorageKey(index);
     const item = JSON.parse(localStorage.getItem(key));

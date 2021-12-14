@@ -12,6 +12,12 @@ class DefaultStorage {
     return frame;
   }
 
+  async addFrames(frames) {
+    this.frames = [...this.frames, ...frames];
+    this.frameCount = this.frames.length;
+    return frames;
+  }
+
   async getFrame(index) {
     return this.frames[index];
   }
