@@ -1,5 +1,3 @@
-const TTYREC_HEADER_SIZE = 12; // bytes, 3 x Uint32
-
 const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) => {
   const handle = setTimeout(() => resolve(data), duration);
   signal?.addEventListener('abort', () => {
@@ -10,47 +8,20 @@ const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) 
 
 // eslint-disable-next-line no-undef
 const decompress = (stream) => stream.pipeThrough(new DecompressionStream('gzip'));
-const parseHeader = (buffer) => {
-  const [timestamp, usec, byteLength] = new Uint32Array(buffer);
-  return ({ timestamp, usec, byteLength });
-};
 
 const parseStream = async (stream, storageHandler, doneHandler) => {
-  console.log('decompression started');
   const decompressed = decompress(stream);
-  console.log('decompression ended');
   const buffer = await new Response(decompressed).arrayBuffer();
-  console.log('got buffer');
+  const { byteLength } = buffer;
   const worker = new Worker(new URL('../workers/parseTTY.js', import.meta.url));
   worker.onmessage = ({ data: frames }) => {
-    console.log('add');
     if (frames === 'done') {
-      console.log('done parsing');
+      doneHandler(byteLength, storageHandler.frameCount);
       worker.terminate();
     }
     storageHandler.addFrames(frames);
   };
   worker.postMessage(buffer, [buffer]);
-  /*
-  const { byteLength: bufferLength } = buffer;
-  let offset = 0;
-  const decoder = new TextDecoder();
-  while (offset < bufferLength) {
-    const payloadOffset = offset + TTYREC_HEADER_SIZE;
-    const { timestamp, usec, byteLength } = parseHeader(buffer.slice(offset, payloadOffset));
-    const payloadBuffer = buffer.slice(payloadOffset, payloadOffset + byteLength);
-    const payload = decoder.decode(new Uint8Array(payloadBuffer));
-    const toMillisec = timestamp * 1e3 + Math.floor(usec / 1e3);
-    const frame = {
-      timestamp: toMillisec,
-      payload,
-    };
-    storageHandler.addFrame(frame);
-    offset += TTYREC_HEADER_SIZE + byteLength;
-    console.log('offset', offset, 'of', bufferLength);
-  }
-  return doneHandler(bufferLength);
-  */
 };
 
 // https://eslint.org/docs/rules/no-await-in-loop#when-not-to-use-it
