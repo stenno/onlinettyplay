@@ -19,7 +19,13 @@ const $frameCounter = document.querySelector('.frames');
 let abortAutoplay = null;
 let currentFrame = 0;
 
-const term = new Terminal();
+const MIN_COLUMNS = 80;
+const MIN_ROWS = 24;
+
+$rowInput.value = MIN_ROWS;
+$columnInput.value = MIN_COLUMNS;
+
+const term = new Terminal({ rows: MIN_ROWS, columns: MIN_COLUMNS });
 term.open(document.querySelector('#terminal'));
 
 const currentFrameString = (current, max) => `Frame: ${current}/${max}`;
@@ -52,7 +58,7 @@ $setDimensionsButton.addEventListener('click', () => {
   stopPlayback(abortAutoplay);
   $loadStatus.textContent = 'Paused playback';
   term.reset();
-  term.resize(Math.max(80, columns), Math.max(24, rows));
+  term.resize(Math.max(MIN_COLUMNS, columns), Math.max(MIN_ROWS, rows));
 });
 
 $loadButton.addEventListener('click', async () => {
