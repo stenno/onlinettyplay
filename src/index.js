@@ -1,5 +1,4 @@
 import { Terminal } from 'xterm';
-
 import { parseStream, createSequence, runSequence } from './stream/TTYStream';
 // import BrowserStorage from './storage/BrowserStorage';
 import DefaultStorage from './storage/DefaultStorage';
@@ -35,8 +34,8 @@ const readFromInput = () => {
 $loadButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started loading, please wait...';
   const stream = readFromInput();
-  parseStream(stream, storage, (bytes) => {
-    $loadStatus.textContent = `Done loading ${bytes} bytes.`;
+  parseStream(stream, storage, (bytes, frames) => {
+    $loadStatus.textContent = `Done loading ${bytes} bytes / ${frames} frames.`;
     $frameCounter.textContent = currentFrameString(0, storage.frameCount);
   });
 });
