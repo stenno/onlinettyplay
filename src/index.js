@@ -1,7 +1,11 @@
-import { Terminal } from 'xterm';
-import { parseStream, createSequence, runSequence } from './stream/TTYStream';
-// import BrowserStorage from './storage/BrowserStorage';
 import DefaultStorage from './storage/DefaultStorage';
+import { parseStream, createSequence, runSequence } from './stream/TTYStream';
+
+const { Terminal } = require('xterm');
+
+// import BrowserStorage from './storage/BrowserStorage';
+
+const AnsiParser = require('node-ansiparser');
 
 const storage = new DefaultStorage();
 
@@ -16,6 +20,8 @@ const $stopButton = document.querySelector('.stop');
 const $loadStatus = document.querySelector('.status');
 const $frameCounter = document.querySelector('.frames');
 
+const ResizeAddon = require('./terminal/ResizeAddon').default;
+
 let abortAutoplay = null;
 let currentFrame = 0;
 
@@ -26,14 +32,33 @@ $rowInput.value = MIN_ROWS;
 $columnInput.value = MIN_COLUMNS;
 
 const term = new Terminal({ rows: MIN_ROWS, columns: MIN_COLUMNS });
+
 term.open(document.querySelector('#terminal'));
+term.loadAddon(new ResizeAddon());
+
+const parseCols = (dataStr) => {
+  let newCols = 0;
+  const colTerm = {
+    inst_p: (data) => {
+      newCols = data.length;
+    },
+  };
+  const parser = new AnsiParser(colTerm);
+  parser.parse(dataStr);
+  return newCols;
+};
 
 const currentFrameString = (current, max) => `Frame: ${current}/${max}`;
 
 const frameHandler = ({ index, payload }) => {
   const { frameCount } = storage;
   $frameCounter.textContent = currentFrameString(index, frameCount);
+  const newCols = Math.max(term.cols, parseCols(payload));
   term.write(payload);
+  if (newCols > term.cols) {
+    term.reset();
+    term.resize(newCols, term.rows);
+  }
 };
 
 const readFromInput = () => {
