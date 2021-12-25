@@ -19,6 +19,8 @@ const $runButton = document.querySelector('.run');
 const $stopButton = document.querySelector('.stop');
 const $loadStatus = document.querySelector('.status');
 const $frameCounter = document.querySelector('.frames');
+const $urlInput = document.querySelector('input[name=url]');
+const $urlButton = document.querySelector('.url-loader button');
 
 const ResizeAddon = require('./terminal/ResizeAddon').default;
 
@@ -66,6 +68,11 @@ const readFromInput = () => {
   return files[0].stream();
 };
 
+const loadCB = (bytes, frames) => {
+  $loadStatus.textContent = `Done loading ${bytes} bytes / ${frames} frames.`;
+  $frameCounter.textContent = currentFrameString(0, storage.frameCount);
+};
+
 const getUserDimensions = () => ({
   rows: +$rowInput.value,
   columns: +$columnInput.value,
@@ -89,10 +96,18 @@ $setDimensionsButton.addEventListener('click', () => {
 $loadButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started loading, please wait...';
   const stream = readFromInput();
-  parseStream(stream, storage, (bytes, frames) => {
-    $loadStatus.textContent = `Done loading ${bytes} bytes / ${frames} frames.`;
-    $frameCounter.textContent = currentFrameString(0, storage.frameCount);
-  });
+  parseStream(stream, storage, loadCB);
+});
+
+$urlButton.addEventListener('click', async () => {
+  $loadStatus.textContent = 'Started downloading, please wait...';
+  try {
+    const url = $urlInput.value;
+    const response = await fetch(url).then((resp) => resp.body);
+    parseStream(response, storage, loadCB);
+  } catch (err) {
+    $loadStatus.textContent = 'Error loading from URL';
+  }
 });
 
 $stopButton.addEventListener('click', () => {

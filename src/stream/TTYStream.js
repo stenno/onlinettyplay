@@ -7,7 +7,9 @@ const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) 
 });
 
 // eslint-disable-next-line no-undef
-const decompress = (stream) => stream.pipeThrough(new DecompressionStream('gzip'));
+const decompress = (stream) => {
+  return stream.pipeThrough(new DecompressionStream('gzip'));
+};
 
 const parseStream = async (stream, storageHandler, doneHandler) => {
   const decompressed = decompress(stream);
