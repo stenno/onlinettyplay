@@ -21,6 +21,7 @@ const $loadStatus = document.querySelector('.status');
 const $frameCounter = document.querySelector('.frames');
 const $urlInput = document.querySelector('input[name=url]');
 const $urlButton = document.querySelector('.url-loader button');
+const $useGzipCheckbox = document.querySelector('[name=use-gzip]');
 
 const ResizeAddon = require('./terminal/ResizeAddon').default;
 
@@ -95,8 +96,9 @@ $setDimensionsButton.addEventListener('click', () => {
 
 $loadButton.addEventListener('click', async () => {
   $loadStatus.textContent = 'Started loading, please wait...';
+  const withDecompression = $useGzipCheckbox.checked;
   const stream = readFromInput();
-  parseStream(stream, storage, loadCB);
+  parseStream(stream, withDecompression, storage, loadCB);
 });
 
 $urlButton.addEventListener('click', async () => {
@@ -104,7 +106,8 @@ $urlButton.addEventListener('click', async () => {
   try {
     const url = $urlInput.value;
     const response = await fetch(url).then((resp) => resp.body);
-    parseStream(response, storage, loadCB);
+    const withDecompression = $useGzipCheckbox.checked;
+    parseStream(response, withDecompression, storage, loadCB);
   } catch (err) {
     $loadStatus.textContent = 'Error loading from URL';
   }
