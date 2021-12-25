@@ -25,9 +25,15 @@
             <label for="rows">Rows:</label><input type="text" name="rows">
             <button class="setdimensions" type="button">Set dimensions</button>
         </div>
+        <div class='decompression'>
+            
+            <label for='use-gzip'>
+                <input type='checkbox' name='use-gzip' checked>
+                Use gzip decompression
+            </label>
+        </div>
         <div class="status"></div>
-        <input type="file" accept=".gz,.gzip">
-
+        <input type="file" accept=".gz,.gzip,.ttyrec">
         <button class="load" type="button">Load</button>
         <button class="run" type="button">⏯</button>
         <button class="stop" type="button">■</button>

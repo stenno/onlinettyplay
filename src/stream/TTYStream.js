@@ -7,13 +7,11 @@ const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) 
 });
 
 // eslint-disable-next-line no-undef
-const decompress = (stream) => {
-  return stream.pipeThrough(new DecompressionStream('gzip'));
-};
+const decompress = (stream) => stream.pipeThrough(new DecompressionStream('gzip'));
 
-const parseStream = async (stream, storageHandler, doneHandler) => {
-  const decompressed = decompress(stream);
-  const buffer = await new Response(decompressed).arrayBuffer();
+const parseStream = async (stream, withDecompression, storageHandler, doneHandler) => {
+  const maybeDecompressed = withDecompression ? decompress(stream) : stream;
+  const buffer = await new Response(maybeDecompressed).arrayBuffer();
   const { byteLength } = buffer;
   const worker = new Worker(new URL('../workers/parseTTY.js', import.meta.url));
   worker.onmessage = ({ data: frames }) => {
