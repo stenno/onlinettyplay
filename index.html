@@ -9,12 +9,17 @@
     <body>
         <h1>Online ttyrec streamer</h1>
         <ol class='instructions'>
-            <li>Select gzipped ttyrec file with the File dialog.</li>
-            <li>Press 'Load' button.</li>
+            <li>Select gzipped ttyrec file with the File dialog or pass an URL to the text input.</li>
+            <li>Press 'Load'/'Download' button.</li>
             <li>After the file was loaded, press the ⏯ button to start/pause playback.</li>
             <li>Press ■ to stop playback.</li>
         </ol>
         <div class="frames">Frame: 0/?</div>
+        <div class="url-loader">
+            <label for="url">Load from URL</label>
+            <input type="text" name="url">
+            <button type='button'>Download</button>
+        </div>
         <div class="dimensions">
             <label for="columns">Columns:</label><input type="text" name="columns">
             <label for="rows">Rows:</label><input type="text" name="rows">
@@ -22,6 +27,7 @@
         </div>
         <div class="status"></div>
         <input type="file" accept=".gz,.gzip">
+
         <button class="load" type="button">Load</button>
         <button class="run" type="button">⏯</button>
         <button class="stop" type="button">■</button>
