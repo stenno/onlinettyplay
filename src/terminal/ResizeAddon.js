@@ -1,4 +1,4 @@
-const handleResize = (injTerm) => () => {
+const handleResize = (injTerm, callback) => () => {
   const term = injTerm;
   const buffer = term.buffer.active;
   const extendRows = buffer.viewportY;
@@ -8,6 +8,7 @@ const handleResize = (injTerm) => () => {
     term.write = () => 0;
     term.reset();
     term.resize(term.cols, newRows);
+    callback(term);
     term.write = oldWrite;
   }
 };
@@ -17,9 +18,13 @@ class ResizeAddon {
 
   disposables = [];
 
+  constructor(callback = () => 0) {
+    this.callback = callback;
+  }
+
   activate(terminal) {
     this.terminal = terminal;
-    this.disposables.push(this.terminal.onLineFeed(handleResize(this.terminal)));
+    this.disposables.push(this.terminal.onLineFeed(handleResize(this.terminal, this.callback)));
   }
 
   dispose() {

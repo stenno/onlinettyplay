@@ -37,6 +37,7 @@ $columnInput.value = MIN_COLUMNS;
 const term = new Terminal({ rows: MIN_ROWS, columns: MIN_COLUMNS });
 
 term.open(document.querySelector('#terminal'));
+
 term.loadAddon(new ResizeAddon());
 
 const parseCols = (dataStr) => {
@@ -128,6 +129,7 @@ $runButton.addEventListener('click', async () => {
   }
   $loadStatus.textContent = 'Started playback';
   abortAutoplay = new AbortController();
+
   const sequenceGen = createSequence(storage)(currentFrame)();
   try {
     currentFrame = await runSequence(abortAutoplay, sequenceGen, frameHandler);

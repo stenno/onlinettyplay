@@ -1,3 +1,5 @@
+const cp437 = require('../terminal/cp437.json');
+
 const TTYREC_HEADER_SIZE = 12; // bytes, 3 x Uint32
 const HOLD_FRAMES = 1000;
 const parseHeader = (buffer) => {
@@ -5,18 +7,19 @@ const parseHeader = (buffer) => {
   return ({ timestamp, usec, byteLength });
 };
 
+const ibmToUnicode = (buffer) => Array.from(buffer, (c) => cp437[c] ?? String.fromCharCode(c)).join('');
 /* eslint-disable-next-line no-restricted-globals */
 self.onmessage = (e) => {
   const buffer = e.data;
   const { byteLength: bufferLength } = buffer;
   let offset = 0;
-  const decoder = new TextDecoder();
   let frames = [];
   while (offset < bufferLength) {
     const payloadOffset = offset + TTYREC_HEADER_SIZE;
     const { timestamp, usec, byteLength } = parseHeader(buffer.slice(offset, payloadOffset));
     const payloadBuffer = buffer.slice(payloadOffset, payloadOffset + byteLength);
-    const payload = decoder.decode(new Uint8Array(payloadBuffer));
+
+    const payload = ibmToUnicode(new Uint8Array(payloadBuffer));
     const toMillisec = timestamp * 1e3 + Math.floor(usec / 1e3);
     const frame = {
       timestamp: toMillisec,
