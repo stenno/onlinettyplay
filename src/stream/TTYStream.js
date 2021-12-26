@@ -1,3 +1,5 @@
+const { DecompressionStream: GzipStream } = require('@stardazed/streams-compression');
+
 const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) => {
   const handle = setTimeout(() => resolve(data), duration);
   signal?.addEventListener('abort', () => {
@@ -6,8 +8,7 @@ const delay = (data) => (duration) => (signal) => new Promise((resolve, reject) 
   });
 });
 
-// eslint-disable-next-line no-undef
-const decompress = (stream) => stream.pipeThrough(new DecompressionStream('gzip'));
+const decompress = (stream) => stream.pipeThrough(new GzipStream('gzip'));
 
 const parseStream = async (stream, withDecompression, storageHandler, doneHandler) => {
   const maybeDecompressed = withDecompression ? decompress(stream) : stream;
