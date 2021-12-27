@@ -1,5 +1,6 @@
 class DefaultStorage {
   frames = [];
+
   frameCount = 0;
 
   constructor() {

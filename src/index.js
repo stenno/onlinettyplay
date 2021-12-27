@@ -6,6 +6,24 @@ const { Terminal } = require('xterm');
 // import BrowserStorage from './storage/BrowserStorage';
 
 const AnsiParser = require('node-ansiparser');
+const { AnsiTerminal } = require('node-ansiterminal');
+
+const MIN_COLUMNS = 80;
+const MAX_COLUMNS = 1000;
+const MIN_ROWS = 24;
+const MAX_ROWS = 1000;
+
+const shadowTerminal = new AnsiTerminal(MAX_COLUMNS, MAX_ROWS, 500);
+const shadowParser = new AnsiParser(shadowTerminal);
+
+const getShadowDimensions = (term) => {
+  const str = term.toString();
+  const rowLengths = str.replace(/\n+$/, '').split('\n').map((row) => row.length);
+  return {
+    rows: rowLengths.length,
+    columns: Math.max(...rowLengths, 0),
+  };
+};
 
 const storage = new DefaultStorage();
 
@@ -28,9 +46,6 @@ const ResizeAddon = require('./terminal/ResizeAddon').default;
 let abortAutoplay = null;
 let currentFrame = 0;
 
-const MIN_COLUMNS = 80;
-const MIN_ROWS = 24;
-
 $rowInput.value = MIN_ROWS;
 $columnInput.value = MIN_COLUMNS;
 
@@ -38,30 +53,17 @@ const term = new Terminal({ rows: MIN_ROWS, columns: MIN_COLUMNS });
 
 term.open(document.querySelector('#terminal'));
 
-term.loadAddon(new ResizeAddon());
-
-const parseCols = (dataStr) => {
-  let newCols = 0;
-  const colTerm = {
-    inst_p: (data) => {
-      newCols = data.length;
-    },
-  };
-  const parser = new AnsiParser(colTerm);
-  parser.parse(dataStr);
-  return newCols;
-};
-
 const currentFrameString = (current, max) => `Frame: ${current}/${max}`;
 
 const frameHandler = ({ index, payload }) => {
   const { frameCount } = storage;
   $frameCounter.textContent = currentFrameString(index, frameCount);
-  const newCols = Math.max(term.cols, parseCols(payload));
+  shadowParser.parse(payload);
+  const { rows, columns } = getShadowDimensions(shadowTerminal);
   term.write(payload);
-  if (newCols > term.cols) {
-    term.reset();
-    term.resize(newCols, term.rows);
+  if (rows > term.rows || columns > term.cols) {
+    //term.reset();
+    term.resize(Math.max(term.cols, columns), Math.max(term.rows, rows));
   }
 };
 
