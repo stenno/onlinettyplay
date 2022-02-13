@@ -8,6 +8,8 @@ const { Terminal } = require('xterm');
 const AnsiParser = require('node-ansiparser');
 const { AnsiTerminal } = require('node-ansiterminal');
 
+const ttyplay = require('ttyplay')
+
 const MIN_COLUMNS = 80;
 const MAX_COLUMNS = 1000;
 const MIN_ROWS = 24;
@@ -72,7 +74,15 @@ const readFromInput = () => {
   return files[0].stream();
 };
 
-const loadCB = (bytes, frames) => {
+const loadCB = async (bytes, frames) => {
+  await ttyplay.default()
+
+  console.log("Parsed TTYRec Frames")
+  const framePayloads = storage.frames.map(({payload}) => payload)
+  console.log("Extracted raw frame diffs")
+
+  const renderedFrames = ttyplay.parse_ttyrec_frames(framePayloads)
+//  console.log(renderedFrames)
   $loadStatus.textContent = `Done loading ${bytes} bytes / ${frames} frames.`;
   $frameCounter.textContent = currentFrameString(0, storage.frameCount);
 };
