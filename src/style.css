@@ -1,0 +1,19 @@
+.controls-container {
+    display: flex;
+    flex-direction: row;
+}
+section {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid darkgray;
+    margin: 3px;
+    padding: 3px;
+}
+section > h4 {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+#terminal {
+    font-family: "Menlo", "Dejavu Sans Mono", monospace;
+    font-size: 0.7rem;
+}

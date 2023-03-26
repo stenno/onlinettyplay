@@ -7,37 +7,39 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css" integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </head>
     <body>
-        <h1>Online ttyrec streamer</h1>
-        <ol class='instructions'>
-            <li>Select gzipped ttyrec file with the File dialog or pass an URL to the text input.</li>
-            <li>Press 'Load'/'Download' button.</li>
-            <li>After the file was loaded, press the ⏯ button to start/pause playback.</li>
-            <li>Press ■ to stop playback.</li>
-        </ol>
-        <div class="frames">Frame: 0/?</div>
-        <div class="url-loader">
-            <label for="url">Load from URL</label>
-            <input type="text" name="url">
-            <button type='button'>Download</button>
+        <div class="headline-container">
+            <h1>Online ttyrec streamer</h1>
         </div>
-        <div class="dimensions">
-            <label for="columns">Columns:</label><input type="text" name="columns">
-            <label for="rows">Rows:</label><input type="text" name="rows">
-            <button class="setdimensions" type="button">Set dimensions</button>
+        <div class="controls-container">
+            <section class="loading-section">
+                <h4>Loading</h4>
+                <label for='use-gzip'>Use gzip decompression <input type='checkbox' name='use-gzip' checked></label>
+                <label for="url">Load from URL <input type="text" name="url"><button class="download" type='button'>Download</button></label>
+                <label for="file">Load from file <input type="file" name="file" accept=".gz,.gzip,.ttyrec"><button class="load" type="button">Load</button></label>
+            </section>
+            <section class="parsing-section">
+                <h4>Parsing</h4>
+                <label for="maxrows">Max rows <input name="maxrows" type="text" value="100"></label>
+                <label for="maxcols">Max cols <input name="maxcols" type="text" value="300"></label>
+                <label for="chunksize">Frame chunk size <input name="chunksize" type="text" value="25000"></label>
+            </section>
+                
+            <section class="navigation-section">
+                <h4>Navigation</h4>
+                <label for="jump">Jump to frame <input type="text" name="jump"> <button class="dojump" type="button">Jump</button></label>
+                
+            </section>            
+            <section class="debug-output">
+                <h4>Debug output</h4>
+                <div class="debug-container">
+                    <textarea cols="80" rows="5"></textarea>
+                </div>
+            </section>
         </div>
-        <div class='decompression'>
-            
-            <label for='use-gzip'>
-                <input type='checkbox' name='use-gzip' checked>
-                Use gzip decompression
-            </label>
+        
+        <div class="output-container">
+            <pre id="terminal"></pre>
         </div>
-        <div class="status"></div>
-        <input type="file" accept=".gz,.gzip,.ttyrec">
-        <button class="load" type="button">Load</button>
-        <button class="run" type="button">⏯</button>
-        <button class="stop" type="button">■</button>
-        <div id="terminal"></div>
     </body>
     
 </html>

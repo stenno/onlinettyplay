@@ -1,0 +1,5 @@
+{
+    "MAX_ROWS": 75,
+    "MAX_COLS": 350,
+    "CHUNK_SIZE": 25000
+}
