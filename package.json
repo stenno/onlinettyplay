@@ -22,20 +22,22 @@
     "@babel/preset-env": "^7.16.0",
     "@webpack-cli/generators": "^2.4.1",
     "babel-loader": "^8.2.3",
+    "css-loader": "^6.7.3",
     "depcheck": "^1.4.2",
     "eslint": "^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
     "html-webpack-plugin": "^5.5.0",
-    "webpack": "^5.64.1",
-    "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.6.0"
+    "style-loader": "^3.3.2",
+    "webpack": "^5.76.2",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.13.1"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.3",
     "@stardazed/streams-compression": "^1.0.0",
     "node-ansiparser": "^2.2.0",
-    "node-ansiterminal": "^0.2.1-beta",
+    "node-ansiterminal": "git+https://github.com/netzkolchose/node-ansiterminal.git",
     "xterm": "^4.15.0"
   }
 }
